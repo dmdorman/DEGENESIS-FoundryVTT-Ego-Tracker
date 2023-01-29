@@ -1,3 +1,5 @@
+import { DegenesisCombat } from "../../../systems/degenesis/module/combat-degenesis.js"
+
 Hooks.on("init", function() {
     DGNS_Ego_Tracker.initialize()
 });
@@ -7,11 +9,11 @@ Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
 });
 
 Hooks.on("combatRound", function () {
-    DGNS_Ego_Tracker.log(true, "combatRound called! -------------------")
+    // DGNS_Ego_Tracker.log(true, "combatRound called! -------------------")
     
     const activeEncounter = game.combats.combats.find(e => e.active === true)
 
-    DGNS_Ego_Tracker.log(true, activeEncounter)
+    // DGNS_Ego_Tracker.log(true, activeEncounter)
 
 
     // for (const [key, value] of Object.entries(activeEncounter.combatants.contents)) {
@@ -19,25 +21,38 @@ Hooks.on("combatRound", function () {
     // }
 
     activeEncounter.combatants.contents.forEach(function (item, index) {
-        DGNS_Ego_Tracker.log(true, item.name)
-        DGNS_Ego_Tracker.log(true, item.players)
+        //DGNS_Ego_Tracker.log(true, item.name)
+        // DGNS_Ego_Tracker.log(true, item.players)
 
-        let egoTrackerForm = new DGNS_Ego_Tracker_Form()
-        let userId = game.userId
-        egoTrackerForm.render(true, {userId})
+        if (item.players.length !== 0) {
+            // DGNS_Ego_Tracker.log(true, item.name)
+            item.players.forEach(function(i, ind) {
+                let egoTrackerForm = new DGNS_Ego_Tracker_Form(item, {})
+
+                egoTrackerForm.render(true, {})
+            })
+        } else {
+            let egoTrackerForm = new DGNS_Ego_Tracker_Form(item, {})
+            egoTrackerForm.render(true, {})
+        }
     });
 
 });
+
+Hooks.on("closeFormApplication", function () {
+    // DGNS_Ego_Tracker.log(true, "CLOSE!")
+    // DGNS_Ego_Tracker.log(true, this)
+})
 
 class DGNS_Ego_Tracker {
     static initialize() {
         //this.customRulerForm = new DGNS_Ego_Tracker_Form()
     }
 
-    static ID = 'dgns-ego-tracker';
+    static ID = 'degenesis-ego-tracker';
 
     static FLAGS = {
-        CUSTOMRULER: 'dgns-ego-tracker'
+        DGNSEGOTRACKER: 'degenesis-ego-tracker'
     }
 
     static TEMPLATES = {
@@ -61,14 +76,13 @@ class DGNS_Ego_Tracker_Form extends FormApplication {
 
         const overrides = {
             height: 'auto',
-            width: 600,
+            width: 100,
             id: DGNS_Ego_Tracker.ID,
             template: DGNS_Ego_Tracker.TEMPLATES.DGNS_Ego_Tracker,
             title: "DGNS-EGO-TRACKER.title",
-            userId: game.userId,
-            closeOnSubmit: false, // do not close when submitted
+            closeOnSubmit: true, // do not close when submitted
             submitOnChange: true, // submit when any input changes
-            resizable: true,
+            resizable: false,
         }
 
         const mergedOptions = foundry.utils.mergeObject(defaults, overrides);
@@ -76,18 +90,44 @@ class DGNS_Ego_Tracker_Form extends FormApplication {
         return mergedOptions
     }
 
-    // getData(options) {
-    //     return {
-    //         isGM : game.users.get(options.userId)?.isGM,
-    //         customRulers: DGNS_Ego_TrackerData.getDGNS_Ego_TrackersForUser(options.userId),
-    //     }
-    // }
+    getData(options) {
+        const actor = this.object.token._actor
 
-    // async _updateObject(event, formData) {
-    //     const expandedData = foundry.utils.expandObject(formData);
+        const ego = actor.system.condition.ego
 
-    //     await DGNS_Ego_TrackerData.updateUserDGNS_Ego_Tracker(this.options.userId, expandedData);
+        const name = actor.name
 
-    //     this.render();
-    // }
+        return {
+            ego: ego,
+            name: name,
+            spend: 0
+        }
+    }
+
+    async _updateObject(event, formData) {
+        const actor = this.object.token._actor
+
+        const ego = actor.system.condition.ego
+
+        let spendEgo = formData.spend
+
+        if (formData.spend > (ego.max - ego.value)) {
+            spendEgo = ego.max - ego.value
+        }
+
+        if (spendEgo > 3) {
+            spendEgo = 3
+        }
+
+        const newEgo = ego.value + spendEgo
+
+        await actor.update({["system.state.spentEgo.value"] : newEgo})
+        //await actor.update({["system.condition.ego.value"] : newEgo})
+
+        //await actor.update({ "flags.degenesis.-=spentEgoActionModifier": spendEgo })
+
+        DegenesisCombat.rollInitiativeFor(actor)
+
+        this.render();
+    }
 }

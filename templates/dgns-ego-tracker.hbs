@@ -1,3 +1,17 @@
+{{log 'DGNS-ego-tracker-template' this}}
 <form>
-    <div>hello world!</div>
+    <div class=".title">{{name}}</div>
+
+    <table>
+        <tr>
+            <th>Spend</th>
+            <th>Current</th>
+            <th>Max</th>
+        </tr>
+        <tr>
+            <th><input type="Number" value="{{spend}}" name="spend" /></th></th>
+            <th>{{ego.value}}</th>
+            <th>{{ego.max}}</th>
+        </tr>
+    </table>
 </form>
