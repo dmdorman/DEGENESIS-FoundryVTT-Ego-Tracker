@@ -25,6 +25,7 @@
             "path": "lang/en.json"
         }
     ],
+    "socket": true,
     "system": ["degenesis"],
     "url": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker",
     "manifest": "https://raw.githubusercontent.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/v1.0.1-alpha/module.json",

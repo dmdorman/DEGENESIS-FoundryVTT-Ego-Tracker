@@ -1,62 +1,105 @@
 import { DegenesisCombat } from "../../../systems/degenesis/module/combat-degenesis.js"
 
 Hooks.on("init", function() {
-    DGNS_Ego_Tracker.initialize()
+    //EgoTracker.initialize()
 });
 
 Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-    registerPackageDebugFlag(DGNS_Ego_Tracker.ID);
+    registerPackageDebugFlag(EgoTracker.ID);
 });
 
-Hooks.on("combatRound", function () {
-    // DGNS_Ego_Tracker.log(true, "combatRound called! -------------------")
-    
-    const activeEncounter = game.combats.combats.find(e => e.active === true)
+Hooks.once("ready", () => {
+    EgoTracker.initialize()
 
-    // DGNS_Ego_Tracker.log(true, activeEncounter)
+    game.socket.on(EgoTracker.SOCKET, ( options ) => {
+        EgoTracker.log(true, "-----------------")
+        EgoTracker.log(true, options.type)
+
+        switch(options.type) {
+            case 'open':
+                
+                const userId = game.userId;
+        
+                EgoTracker.egoTrackerForm.render(true, {userId})
+
+                break;
+            default:
+                break;
+        }
+
+    //   switch(options.type) {
+    //     case 'show':
+    //       Hooks.call('showHourglass', options.options);
+    //       break;
+    //     case 'increment':
+    //       Hooks.call('incrementHourglass', options.options); 
+    //       break;
+    //     case 'pause':
+    //       Hooks.call('pauseHourglass', options.options); 
+    //       break;
+    //   }
+    });
+  });
+
+Hooks.on("combatRound", function () {
+    // EgoTracker.log(true, "combatRound called! -------------------")
+    
+    const userId = game.userId;
+    
+    EgoTracker.egoTrackerForm.render(true, {userId})
+
+    game.socket.emit(EgoTracker.SOCKET, { type:'open', options: {} });
+
+    // EgoTracker.log(true, activeEncounter)
 
 
     // for (const [key, value] of Object.entries(activeEncounter.combatants.contents)) {
-    //     DGNS_Ego_Tracker.log(key)
+    //     EgoTracker.log(key)
     // }
 
-    activeEncounter.combatants.contents.forEach(function (item, index) {
-        //DGNS_Ego_Tracker.log(true, item.name)
-        // DGNS_Ego_Tracker.log(true, item.players)
 
-        if (item.players.length !== 0) {
-            // DGNS_Ego_Tracker.log(true, item.name)
-            item.players.forEach(function(i, ind) {
-                let egoTrackerForm = new DGNS_Ego_Tracker_Form(item, {})
 
-                egoTrackerForm.render(true, {})
-            })
-        } else {
-            let egoTrackerForm = new DGNS_Ego_Tracker_Form(item, {})
-            egoTrackerForm.render(true, {})
-        }
-    });
+    // activeEncounter.combatants.contents.forEach(function (item, index) {
+    //     //EgoTracker.log(true, item.name)
+    //     // EgoTracker.log(true, item.players)
+
+    //     if (item.players.length !== 0) {
+    //         // EgoTracker.log(true, item.name)
+    //         item.players.forEach(function(i, ind) {
+    //             let egoTrackerForm = new EgoTrackerForm(item, {})
+
+    //             egoTrackerForm.render(true, {})
+    //         })
+    //     } else {
+    //         let egoTrackerForm = new EgoTrackerForm(item, {})
+    //         egoTrackerForm.render(true, {})
+    //     }
+    // });
+
+    
 
 });
 
 Hooks.on("closeFormApplication", function () {
-    // DGNS_Ego_Tracker.log(true, "CLOSE!")
-    // DGNS_Ego_Tracker.log(true, this)
+    // EgoTracker.log(true, "CLOSE!")
+    // EgoTracker.log(true, this)
 })
 
-class DGNS_Ego_Tracker {
+class EgoTracker {
     static initialize() {
-        //this.customRulerForm = new DGNS_Ego_Tracker_Form()
+        this.egoTrackerForm = new EgoTrackerForm()
     }
 
     static ID = 'degenesis-ego-tracker';
+
+    static SOCKET = 'module.' + this.ID
 
     static FLAGS = {
         DGNSEGOTRACKER: 'degenesis-ego-tracker'
     }
 
     static TEMPLATES = {
-        DGNS_Ego_Tracker: `./modules/${this.ID}/templates/dgns-ego-tracker.hbs`
+        EgoTracker: `./modules/${this.ID}/templates/dgns-ego-tracker.hbs`
     }
 
     static SETTINGS = {}
@@ -70,16 +113,21 @@ class DGNS_Ego_Tracker {
     }
 }
 
-class DGNS_Ego_Tracker_Form extends FormApplication {
+class EgoTrackerForm extends FormApplication {
+    static initialize() {
+        this.egoTracker = new EgoTrackerForm()
+    }
+
     static get defaultOptions() {
         const defaults = super.defaultOptions;
 
         const overrides = {
             height: 'auto',
             width: 100,
-            id: DGNS_Ego_Tracker.ID,
-            template: DGNS_Ego_Tracker.TEMPLATES.DGNS_Ego_Tracker,
+            id: EgoTracker.ID,
+            template: EgoTracker.TEMPLATES.EgoTracker,
             title: "DGNS-EGO-TRACKER.title",
+            userId: game.userId,
             closeOnSubmit: true, // do not close when submitted
             submitOnChange: true, // submit when any input changes
             resizable: false,
@@ -91,17 +139,23 @@ class DGNS_Ego_Tracker_Form extends FormApplication {
     }
 
     getData(options) {
-        const actor = this.object.token._actor
-
-        const ego = actor.system.condition.ego
-
-        const name = actor.name
+        const tokens = EgoTrackerData.getTokensForUser(game.userId)
 
         return {
-            ego: ego,
-            name: name,
-            spend: 0
+            tokens: tokens
         }
+
+        // const actor = this.object.token._actor
+
+        // const ego = actor.system.condition.ego
+
+        // const name = actor.name
+
+        // return {
+        //     ego: ego,
+        //     name: name,
+        //     spend: 0
+        // }
     }
 
     async _updateObject(event, formData) {
@@ -129,5 +183,39 @@ class DGNS_Ego_Tracker_Form extends FormApplication {
         DegenesisCombat.rollInitiativeFor(actor)
 
         this.render();
+    }
+}
+
+class EgoTrackerData {
+    static getActiveEncounter() {
+        return game.combats.combats.find(e => e.active === true)
+    }
+
+    static getTokensForUser(userId) {
+        const encounter = this.getActiveEncounter()
+
+        const tokens = encounter.combatants.contents.reduce((accumulator, token) => {
+            const player = game.users.get(userId)
+            
+            if (player.isGM && token.players.length === 0) {
+                // npc
+                EgoTracker.log(true, "NPC")
+                return {
+                    ...accumulator,
+                    ...token,
+                }
+            } else if (token.players.includes(player)) {
+                return {
+                    ...accumulator,
+                    ...token,
+                }
+            } else {
+                return {
+                    ...accumulator
+                }
+            }  
+        })
+
+        return tokens
     }
 }
