@@ -27,11 +27,6 @@ Hooks.on("combatRound", function () {
     game.socket.emit(EgoTracker.SOCKET, { type:'open', options: {} });
 });
 
-// Hooks.on("closeFormApplication", function () {
-//     // EgoTracker.log(false, "CLOSE!")
-//     // EgoTracker.log(false, this)
-// })
-
 class EgoTracker {
     static initialize() {
         this.egoTrackerForm = new EgoTrackerForm()
@@ -91,45 +86,10 @@ class EgoTrackerForm extends FormApplication {
         return {
             data: tokens
         }
-
-        // const actor = this.object.token._actor
-
-        // const ego = actor.system.condition.ego
-
-        // const name = actor.name
-
-        // return {
-        //     ego: ego,
-        //     name: name,
-        //     spend: 0
-        // }
     }
 
-    async _updateObject(event, formData) {
-        // const actor = this.object.token._actor
-
-        // const ego = actor.system.condition.ego
-
-        // let spendEgo = formData.spend
-
-        // if (formData.spend > (ego.max - ego.value)) {
-        //     spendEgo = ego.max - ego.value
-        // }
-
-        // if (spendEgo > 3) {
-        //     spendEgo = 3
-        // }
-
-        // const newEgo = ego.value + spendEgo
-
-        // await actor.update({["system.state.spentEgo.value"] : newEgo})
-        // //await actor.update({["system.condition.ego.value"] : newEgo})
-
-        // //await actor.update({ "flags.degenesis.-=spentEgoActionModifier": spendEgo })
-
-        DegenesisCombat.rollInitiativeFor(actor)
-
-        this.render();
+    async _updateObject(event, formData) { 
+        // do nothing
     }
 
     activateListeners(html) {
@@ -140,8 +100,6 @@ class EgoTrackerForm extends FormApplication {
     }
 
     async _onEgoTrackerDiamond(event) {
-        EgoTracker.log(false, "Diamond Click!")
-
         const target = $(event.currentTarget).parents(".ego-tracker-diamond-row").attr("data-target")
 
         const index = Number($(event.currentTarget).attr("data-index"));
@@ -154,18 +112,12 @@ class EgoTrackerForm extends FormApplication {
             spentEgo = spentEgo - 1
         }
 
-        //await actor.update({["system.condition.ego.value"] : spentEgo})
         await actor.update({["system.state.spentEgo.value"] : spentEgo})
 
         this.render()
-
-        EgoTracker.log(false, actor.system.condition.ego)
-
     }
 
     _onRollAllInitiatives(event) {
-        EgoTracker.log(false, "_onRollAllInitiatives =======================")
-
         const userId = game.userId
 
         const tokenActors = EgoTrackerData.getTokenActorsForUser(userId)
