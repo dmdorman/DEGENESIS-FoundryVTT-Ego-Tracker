@@ -1,10 +1,9 @@
-{{log 'Ego-Tracker-template' this}}
 <form>
     <table>
         <tr>
             <th></th>
-            <th class="ego-tracker-label">Character</th>
-            <th class="ego-tracker-label">Ego</th>
+            <th class="ego-tracker-label">{{localize "DGNS-EGO-TRACKER.character"}}</th>
+            <th class="ego-tracker-label">{{localize "DGNS-EGO-TRACKER.ego"}}</th>
         </tr>
         {{#each data}}
         <tr data-token-id="{{token.tokenId}}">

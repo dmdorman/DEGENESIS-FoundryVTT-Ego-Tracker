@@ -1,5 +1,7 @@
 {
     "DGNS-EGO-TRACKER" : {
-        "title": "Ego Tracker"
+        "title": "Ego Tracker",
+        "character": "Character",
+        "ego": "Ego"
     }
 }
