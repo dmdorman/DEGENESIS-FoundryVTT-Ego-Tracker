@@ -22,7 +22,14 @@ Hooks.once("ready", () => {
 
 Hooks.on("combatRound", function () {
     const encounter = EgoTrackerData.getActiveEncounter()
-    console.log(encounter.combatants)
+
+    encounter.combatants.forEach(function(combatant, index) {
+        const itemIds = combatant.actor.items.filter(e => e.name === 'Spent Ego Bonus').map(function (value, index) {
+            return value._id
+        })
+
+        combatant.actor.deleteEmbeddedDocuments('Item', itemIds)
+    })
     
     EgoTracker.openForm()
 });
@@ -189,9 +196,6 @@ class EgoTrackerData {
 
             //const egoValue = actors[index].system.state.spentEgo.value
             const egoRemaining = tokens[index].actor.system.condition.ego.max - tokens[index].actor.system.condition.ego.value
-
-            console.log("666666666666666")
-            console.log(egoRemaining)
 
             const egoValue = tokens[index].actor.system.state.spentEgo.value
             for (const [key, value] of Object.entries(spentEgoBase)) {
