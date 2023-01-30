@@ -1,17 +1,32 @@
 {{log 'DGNS-ego-tracker-template' this}}
 <form>
-    <div class=".title">{{name}}</div>
-
     <table>
         <tr>
-            <th>Spend</th>
-            <th>Current</th>
-            <th>Max</th>
+            <th class="ego-tracker-label">Character</th>
+            <th class="ego-tracker-label">Ego</th>
         </tr>
-        <tr>
-            <th><input type="Number" value="{{spend}}" name="spend" /></th></th>
-            <th>{{ego.value}}</th>
-            <th>{{ego.max}}</th>
+        {{#each data}}
+        <tr data-token-id="{{token.tokenId}}">
+            <th class="ego-tracker-character-name">{{token.name}}</th>
+            <th>
+                <div class="ego-tracker-diamond-row" data-target="{{actor.id}}">
+                {{#each spentEgo as |diamond index|}} 
+                    {{#if diamond.filled}}
+                    <a class="diamond" data-index="{{index}}"
+                        ><div class="square black"></div
+                    ></a>
+                    {{else}}
+                    <a class="diamond" data-index="{{index}}"
+                        ><div class="square"></div
+                    ></a>
+                    {{/if}} 
+                {{/each}}
+                </div>
+            </th>
         </tr>
+        {{/each}}
     </table>
+    <div class="ego-tracker-initiative-roll">
+        <i class="fas fa-dice"></i>
+    </div>
 </form>

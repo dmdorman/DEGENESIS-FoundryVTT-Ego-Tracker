@@ -1,9 +1,5 @@
 import { DegenesisCombat } from "../../../systems/degenesis/module/combat-degenesis.js"
 
-Hooks.on("init", function() {
-    //EgoTracker.initialize()
-});
-
 Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
     registerPackageDebugFlag(EgoTracker.ID);
 });
@@ -12,78 +8,29 @@ Hooks.once("ready", () => {
     EgoTracker.initialize()
 
     game.socket.on(EgoTracker.SOCKET, ( options ) => {
-        EgoTracker.log(true, "-----------------")
-        EgoTracker.log(true, options.type)
-
         switch(options.type) {
             case 'open':
-                
                 const userId = game.userId;
-        
                 EgoTracker.egoTrackerForm.render(true, {userId})
 
                 break;
             default:
                 break;
         }
-
-    //   switch(options.type) {
-    //     case 'show':
-    //       Hooks.call('showHourglass', options.options);
-    //       break;
-    //     case 'increment':
-    //       Hooks.call('incrementHourglass', options.options); 
-    //       break;
-    //     case 'pause':
-    //       Hooks.call('pauseHourglass', options.options); 
-    //       break;
-    //   }
     });
   });
 
-Hooks.on("combatRound", function () {
-    // EgoTracker.log(true, "combatRound called! -------------------")
-    
+Hooks.on("combatRound", function () {    
     const userId = game.userId;
-    
     EgoTracker.egoTrackerForm.render(true, {userId})
 
     game.socket.emit(EgoTracker.SOCKET, { type:'open', options: {} });
-
-    // EgoTracker.log(true, activeEncounter)
-
-
-    // for (const [key, value] of Object.entries(activeEncounter.combatants.contents)) {
-    //     EgoTracker.log(key)
-    // }
-
-
-
-    // activeEncounter.combatants.contents.forEach(function (item, index) {
-    //     //EgoTracker.log(true, item.name)
-    //     // EgoTracker.log(true, item.players)
-
-    //     if (item.players.length !== 0) {
-    //         // EgoTracker.log(true, item.name)
-    //         item.players.forEach(function(i, ind) {
-    //             let egoTrackerForm = new EgoTrackerForm(item, {})
-
-    //             egoTrackerForm.render(true, {})
-    //         })
-    //     } else {
-    //         let egoTrackerForm = new EgoTrackerForm(item, {})
-    //         egoTrackerForm.render(true, {})
-    //     }
-    // });
-
-    
-
 });
 
-Hooks.on("closeFormApplication", function () {
-    // EgoTracker.log(true, "CLOSE!")
-    // EgoTracker.log(true, this)
-})
+// Hooks.on("closeFormApplication", function () {
+//     // EgoTracker.log(false, "CLOSE!")
+//     // EgoTracker.log(false, this)
+// })
 
 class EgoTracker {
     static initialize() {
@@ -123,12 +70,12 @@ class EgoTrackerForm extends FormApplication {
 
         const overrides = {
             height: 'auto',
-            width: 100,
+            width: 200,
             id: EgoTracker.ID,
             template: EgoTracker.TEMPLATES.EgoTracker,
             title: "DGNS-EGO-TRACKER.title",
             userId: game.userId,
-            closeOnSubmit: true, // do not close when submitted
+            closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
             resizable: false,
         }
@@ -139,10 +86,10 @@ class EgoTrackerForm extends FormApplication {
     }
 
     getData(options) {
-        const tokens = EgoTrackerData.getTokensForUser(game.userId)
+        const tokens = EgoTrackerData.getTokenActorsForUser(game.userId)
 
         return {
-            tokens: tokens
+            data: tokens
         }
 
         // const actor = this.object.token._actor
@@ -159,30 +106,75 @@ class EgoTrackerForm extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        const actor = this.object.token._actor
+        // const actor = this.object.token._actor
 
-        const ego = actor.system.condition.ego
+        // const ego = actor.system.condition.ego
 
-        let spendEgo = formData.spend
+        // let spendEgo = formData.spend
 
-        if (formData.spend > (ego.max - ego.value)) {
-            spendEgo = ego.max - ego.value
-        }
+        // if (formData.spend > (ego.max - ego.value)) {
+        //     spendEgo = ego.max - ego.value
+        // }
 
-        if (spendEgo > 3) {
-            spendEgo = 3
-        }
+        // if (spendEgo > 3) {
+        //     spendEgo = 3
+        // }
 
-        const newEgo = ego.value + spendEgo
+        // const newEgo = ego.value + spendEgo
 
-        await actor.update({["system.state.spentEgo.value"] : newEgo})
-        //await actor.update({["system.condition.ego.value"] : newEgo})
+        // await actor.update({["system.state.spentEgo.value"] : newEgo})
+        // //await actor.update({["system.condition.ego.value"] : newEgo})
 
-        //await actor.update({ "flags.degenesis.-=spentEgoActionModifier": spendEgo })
+        // //await actor.update({ "flags.degenesis.-=spentEgoActionModifier": spendEgo })
 
         DegenesisCombat.rollInitiativeFor(actor)
 
         this.render();
+    }
+
+    activateListeners(html) {
+        super.activateListeners(html);
+
+        html.find(".diamond").click(this._onEgoTrackerDiamond.bind(this))
+        html.find(".ego-tracker-initiative-roll").click(this._onRollAllInitiatives.bind(this))
+    }
+
+    async _onEgoTrackerDiamond(event) {
+        EgoTracker.log(false, "Diamond Click!")
+
+        const target = $(event.currentTarget).parents(".ego-tracker-diamond-row").attr("data-target")
+
+        const index = Number($(event.currentTarget).attr("data-index"));
+
+        let spentEgo = index + 1
+
+        const actor = game.actors.get(target)
+
+        if (actor.system.state.spentEgo.value === spentEgo) {
+            spentEgo = spentEgo - 1
+        }
+
+        //await actor.update({["system.condition.ego.value"] : spentEgo})
+        await actor.update({["system.state.spentEgo.value"] : spentEgo})
+
+        this.render()
+
+        EgoTracker.log(false, actor.system.condition.ego)
+
+    }
+
+    _onRollAllInitiatives(event) {
+        EgoTracker.log(false, "_onRollAllInitiatives =======================")
+
+        const userId = game.userId
+
+        const tokenActors = EgoTrackerData.getTokenActorsForUser(userId)
+
+        tokenActors.forEach(function (item, index) {
+            DegenesisCombat.rollInitiativeFor(item.actor)
+        });
+
+        this.close()
     }
 }
 
@@ -191,31 +183,42 @@ class EgoTrackerData {
         return game.combats.combats.find(e => e.active === true)
     }
 
-    static getTokensForUser(userId) {
+    static getTokenActorsForUser(userId) {
         const encounter = this.getActiveEncounter()
 
-        const tokens = encounter.combatants.contents.reduce((accumulator, token) => {
-            const player = game.users.get(userId)
-            
-            if (player.isGM && token.players.length === 0) {
-                // npc
-                EgoTracker.log(true, "NPC")
-                return {
-                    ...accumulator,
-                    ...token,
-                }
-            } else if (token.players.includes(player)) {
-                return {
-                    ...accumulator,
-                    ...token,
-                }
-            } else {
-                return {
-                    ...accumulator
-                }
-            }  
-        })
+        const player = game.users.get(userId)
 
-        return tokens
+        const spentEgoBase = {
+            0: {filled: false},
+            1: {filled: false},
+            2: {filled: false}
+        }
+
+        const tokens = (player.isGM) ? 
+            encounter.combatants.contents.filter(e => e.players.length === 0)
+            : encounter.combatants.contents.filter(e => e.players.includes(player))
+
+        const actors = tokens.map(e => game.actors.get(e.actorId))
+
+        const fullTokenInfo = tokens.map(function (value, index) {
+            let spentEgo = {
+                0: {filled: false},
+                1: {filled: false},
+                2: {filled: false}
+            }
+
+            const egoValue = actors[index].system.state.spentEgo.value
+            for (const [key, value] of Object.entries(spentEgoBase)) {
+                if (egoValue >= (Number(key) + 1)) {
+                    spentEgo[`${key}`].filled = true
+                } else {
+                    spentEgo[key].filled = false
+                }
+            }
+
+            return {"token": value, "actor": actors[index], "spentEgo": spentEgo}
+        });
+
+        return fullTokenInfo
     }
 }

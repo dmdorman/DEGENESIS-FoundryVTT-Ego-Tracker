@@ -1,3 +1,28 @@
-.title {
-    align-self: center;
+.ego-tracker-diamond-row {
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: flex-center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+}
+
+.ego-tracker-initiative-roll {
+    text-align: center;
+    width: 100%;
+    font-size: 40px;
+}
+
+.ego-tracker-character-name {
+    text-align: left;
+}
+
+.ego-tracker-label {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: left;
 }

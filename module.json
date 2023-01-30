@@ -25,6 +25,16 @@
             "path": "lang/en.json"
         }
     ],
+    "relationships": {
+        "systems": [{
+            "id": "degenesis",
+            "type": "system",
+            "manifest": "https://github.com/greedyj4ck/DEGENESIS-FoundryVTT/releases/latest/download/system.json",
+            "compatibility": {
+                "verified": "0.5.1"
+            }
+        }]
+    },
     "socket": true,
     "system": ["degenesis"],
     "url": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker",
