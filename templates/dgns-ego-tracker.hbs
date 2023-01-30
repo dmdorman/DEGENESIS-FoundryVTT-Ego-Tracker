@@ -1,24 +1,35 @@
+{{log 'Ego-Tracker-template' this}}
 <form>
     <table>
         <tr>
+            <th></th>
             <th class="ego-tracker-label">Character</th>
             <th class="ego-tracker-label">Ego</th>
         </tr>
         {{#each data}}
         <tr data-token-id="{{token.tokenId}}">
+            <th>
+                <img class="ego-tracker-character-img" src="{{actor.img}}" />
+            </th>
             <th class="ego-tracker-character-name">{{token.name}}</th>
             <th>
-                <div class="ego-tracker-diamond-row" data-target="{{actor.id}}">
-                {{#each spentEgo as |diamond index|}} 
-                    {{#if diamond.filled}}
-                    <a class="diamond" data-index="{{index}}"
-                        ><div class="square black"></div
-                    ></a>
+                <div class="ego-tracker-diamond-row" data-target="{{token.id}}">
+                {{#each spentEgo as |diamond index|}}
+                    {{#if diamond.disabled}}
+                        <a data-index="{{index}}"
+                            ><div class="square red"></div
+                        ></a>
                     {{else}}
-                    <a class="diamond" data-index="{{index}}"
-                        ><div class="square"></div
-                    ></a>
-                    {{/if}} 
+                        {{#if diamond.filled}}
+                        <a class="diamond" data-index="{{index}}"
+                            ><div class="square black"></div
+                        ></a>
+                        {{else}}
+                        <a class="diamond" data-index="{{index}}"
+                            ><div class="square"></div
+                        ></a>
+                        {{/if}}
+                    {{/if}}
                 {{/each}}
                 </div>
             </th>

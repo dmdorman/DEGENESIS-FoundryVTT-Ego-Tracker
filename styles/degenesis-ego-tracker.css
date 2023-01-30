@@ -26,3 +26,10 @@
     font-weight: bold;
     text-align: left;
 }
+
+.ego-tracker-character-img {
+    width: 40px;
+    text-align: left;
+    margin-left: 0px;
+    border:none;
+}
