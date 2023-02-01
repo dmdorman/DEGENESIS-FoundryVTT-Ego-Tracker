@@ -38,9 +38,9 @@
     "socket": true,
     "system": ["degenesis"],
     "url": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker",
-    "manifest": "https://raw.githubusercontent.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/v1.0.1-alpha/module.json",
-    "download": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/archive/refs/heads/v1.0.1-alpha.zip",
-    "license": "https://raw.githubusercontent.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/v1.0.1-alpha/LICENSE",
-    "changelog": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/blob/v1.0.1-alpha/CHANGELOG.md",
+    "manifest": "https://raw.githubusercontent.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/v1.0.0-alpha/module.json",
+    "download": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/archive/refs/heads/v1.0.0-alpha.zip",
+    "license": "https://raw.githubusercontent.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/v1.0.0-alpha/LICENSE",
+    "changelog": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/blob/v1.0.0-alpha/CHANGELOG.md",
     "bugs": "https://github.com/dmdorman/DEGENESIS-FoundryVTT-Ego-Tracker/issues"
 }
